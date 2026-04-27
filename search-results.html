@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - IRCTC</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo-area" onclick="window.location.href='index.html'" style="cursor: pointer;">
+            <div class="logo-icon">IR</div>
+            <div class="logo-text">
+                <h1>IRCTC</h1>
+                <p>Indian Railway Catering and Tourism Corporation Ltd.</p>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="index.html" style="color: var(--orange)">Book Tickets</a>
+            <a href="#">My Transactions</a>
+            <a href="#">Charts/Vacancy</a>
+            <a href="#">Contact Us</a>
+        </nav>
+        <div class="header-actions">
+            <i class="fa-regular fa-bell" style="cursor:pointer"></i>
+            <button class="btn-account"><i class="fa-regular fa-user"></i> My Account</button>
+        </div>
+    </header>
+
+    <div class="prototype-bar">
+        <span>Screen 2 of 4 — Search Results</span>
+        <a href="index.html" class="btn-nav"><i class="fa-solid fa-arrow-left"></i> Back</a>
+        <a href="passenger-details.html" class="btn-nav">Forward <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <div class="search-summary">
+        <div class="container" style="padding: 0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 32px; align-items: center;">
+                <div class="summary-col">
+                    <span class="summary-label">From</span>
+                    <span class="summary-val">Kanpur Central</span>
+                </div>
+                <i class="fa-solid fa-arrow-right text-orange" style="margin-top: 8px;"></i>
+                <div class="summary-col">
+                    <span class="summary-label">To</span>
+                    <span class="summary-val">New Delhi</span>
+                </div>
+                <div class="divider-vertical"></div>
+                <div class="summary-col">
+                    <span class="summary-label">Date <i class="fa-regular fa-calendar text-muted" style="margin-left:4px;"></i></span>
+                    <span class="summary-val">08 May 2026</span>
+                </div>
+                <div class="divider-vertical"></div>
+                <div class="summary-col">
+                    <span class="summary-label">
+                        Quota
+                        <button class="info-btn" onclick="showTooltipModal('quota')"><i class="fa-solid fa-circle-info"></i></button>
+                    </span>
+                    <span class="summary-val">General</span>
+                </div>
+                <div class="divider-vertical"></div>
+                <div class="summary-col">
+                    <span class="summary-label">Class</span>
+                    <span class="summary-val">All Classes</span>
+                </div>
+            </div>
+            <button class="btn-outline" onclick="window.location.href='index.html'"><i class="fa-solid fa-pen" style="margin-right: 6px;"></i> Modify Search</button>
+        </div>
+    </div>
+
+    <div class="container grid-3">
+
+        <!-- ===== FILTERS ===== -->
+        <div class="filters">
+            <div class="card" style="padding: 20px;">
+                <div class="flex-between filter-header">
+                    <h3 style="font-size: 16px; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-filter" style="color: #3B82F6;"></i> Filters
+                    </h3>
+                    <span style="color: var(--orange); font-size: 12px; cursor: pointer; font-weight: 600;">Clear All</span>
+                </div>
+
+                <!-- Smart Sort Buttons -->
+                <div class="filter-section">
+                    <h4 class="filter-title">Sort By</h4>
+                    <div class="smart-sort-grid">
+                        <button class="smart-sort-btn active" onclick="setSort(this)">
+                            <i class="fa-solid fa-clock"></i><span>Earliest</span>
+                        </button>
+                        <button class="smart-sort-btn" onclick="setSort(this)">
+                            <i class="fa-solid fa-indian-rupee-sign"></i><span>Cheapest</span>
+                        </button>
+                        <button class="smart-sort-btn" onclick="setSort(this)">
+                            <i class="fa-solid fa-bolt"></i><span>Fastest</span>
+                        </button>
+                        <button class="smart-sort-btn" onclick="setSort(this)">
+                            <i class="fa-solid fa-couch"></i><span>Comfort</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4 class="filter-title">Departure Time</h4>
+                    <div class="time-grid">
+                        <label class="time-box"><input type="checkbox"> Morning</label>
+                        <label class="time-box"><input type="checkbox"> Afternoon</label>
+                        <label class="time-box"><input type="checkbox"> Evening</label>
+                        <label class="time-box"><input type="checkbox"> Night</label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4 class="filter-title" style="display:flex;align-items:center;gap:6px;">
+                        Class
+                        <button class="info-btn" onclick="showTooltipModal('classes')"><i class="fa-solid fa-circle-info"></i></button>
+                    </h4>
+                    <div class="checkbox-list">
+                        <label class="filter-label"><input type="checkbox" checked> All Classes</label>
+                        <label class="filter-label"><input type="checkbox"> <span>3A</span>&nbsp;<span class="filter-hint">AC 3 Tier</span></label>
+                        <label class="filter-label"><input type="checkbox"> <span>3E</span>&nbsp;<span class="filter-hint">AC Economy</span></label>
+                        <label class="filter-label"><input type="checkbox"> <span>SL</span>&nbsp;<span class="filter-hint">Sleeper · No AC</span></label>
+                        <label class="filter-label"><input type="checkbox"> <span>2A</span>&nbsp;<span class="filter-hint">AC 2 Tier</span></label>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4 class="filter-title" style="display:flex;align-items:center;gap:6px;">
+                        Availability
+                        <button class="info-btn" onclick="showTooltipModal('availability')"><i class="fa-solid fa-circle-info"></i></button>
+                    </h4>
+                    <div class="checkbox-list">
+                        <label class="filter-label"><input type="checkbox" checked> <span>Confirmed</span>&nbsp;<span class="filter-hint avail-green">Seat guaranteed</span></label>
+                        <label class="filter-label"><input type="checkbox"> <span>RAC</span>&nbsp;<span class="filter-hint avail-yellow">May get seat</span></label>
+                        <label class="filter-label"><input type="checkbox"> <span>WL</span>&nbsp;<span class="filter-hint avail-red">Low chances</span></label>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="filter-title">Duration (hours)</h4>
+                    <input type="range" min="0" max="24" value="24" style="width: 100%; accent-color: #3B82F6; margin-bottom: 4px;">
+                    <div class="flex-between" style="font-size: 11px; color: var(--text-muted);"><span>0h</span><span>24h</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TRAIN LIST ===== -->
+        <div class="train-list">
+            <div class="train-search-bar-wrap">
+                <div class="train-search-bar">
+                    <i class="fa-solid fa-magnifying-glass train-search-icon"></i>
+                    <input type="text" id="trainSearchInput" class="train-search-input"
+                        placeholder="Search by train name or number… e.g. Rewa Express or 12428"
+                        autocomplete="off">
+                    <button class="train-search-clear" id="trainSearchClear" onclick="clearTrainSearch()" title="Clear search">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="train-suggestions" id="trainSuggestions"></div>
+                <div class="train-recent" id="trainRecent">
+                    <div class="train-recent-header">
+                        <i class="fa-solid fa-clock-rotate-left" style="color: var(--text-muted); font-size: 12px;"></i>
+                        <span>Recently searched</span>
+                        <span class="train-recent-clear" onclick="clearRecent()">Clear</span>
+                    </div>
+                    <div id="recentList"></div>
+                    <div class="train-recent-header" style="margin-top: 12px;">
+                        <i class="fa-solid fa-fire" style="color: var(--orange); font-size: 12px;"></i>
+                        <span>Frequently booked on this route</span>
+                    </div>
+                    <div class="frequent-chips" id="frequentChips">
+                        <span class="freq-chip" onclick="applySearch('Rewa Express')">Rewa Express</span>
+                        <span class="freq-chip" onclick="applySearch('12428')">12428</span>
+                        <span class="freq-chip" onclick="applySearch('Mahakaushal')">Mahakaushal</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="searchStatusBanner" class="search-status-banner" style="display:none;"></div>
+
+            <div class="flex-between mb-4" style="margin-top: 8px;">
+                <h3 style="font-size: 16px; color: var(--text-main);">
+                    Available Trains <span id="trainCount">(3)</span>
+                </h3>
+            </div>
+
+            <!-- ===== TRAIN CARD 1: REWA EXPRESS ===== -->
+            <div class="train-card" data-name="REWA EXPRESS" data-number="12428">
+                <div class="tc-header">
+                    <div>
+                        <div class="tc-title train-name-text">REWA EXPRESS</div>
+                        <div class="tc-sub">#12428 | Runs: Mon, Wed, Fri, Sun</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span class="train-badge cheapest-badge"><i class="fa-solid fa-indian-rupee-sign"></i> Cheapest</span>
+                        <div class="pinned-badge" id="pin-12428" style="display:none;"><i class="fa-solid fa-thumbtack"></i> Pinned</div>
+                    </div>
+                </div>
+                <div class="tc-times">
+                    <div class="tc-time"><h3>05:45</h3><p class="tc-sub">CNB</p></div>
+                    <div class="tc-duration"><span style="position:relative;top:-8px;"><i class="fa-regular fa-clock"></i> 7h 45m</span></div>
+                    <div class="tc-time" style="text-align:right;"><h3>13:30</h3><p class="tc-sub">NDLS</p></div>
+                </div>
+                <div class="flex-between items-end mt-2">
+                    <div class="tc-classes">
+                        <div class="tc-class-box">
+                            <div class="flex-between" style="align-items:center;gap:4px;">
+                                <span class="class-name">SL <button class="info-btn" onclick="showTooltipModal('sl')"><i class="fa-solid fa-circle-info"></i></button></span>
+                                <span class="class-price">₹385</span>
+                            </div>
+                            <div class="avail-badge avail-confirmed"><i class="fa-solid fa-circle-check"></i> 62 seats left</div>
+                        </div>
+                        <div class="tc-class-box">
+                            <div class="flex-between" style="align-items:center;gap:4px;">
+                                <span class="class-name">3A <button class="info-btn" onclick="showTooltipModal('3a')"><i class="fa-solid fa-circle-info"></i></button></span>
+                                <span class="class-price">₹720</span>
+                            </div>
+                            <div class="avail-badge avail-confirmed"><i class="fa-solid fa-circle-check"></i> 45 seats left</div>
+                        </div>
+                        <div class="tc-class-box">
+                            <div class="flex-between" style="align-items:center;gap:4px;">
+                                <span class="class-name">2A <button class="info-btn" onclick="showTooltipModal('2a')"><i class="fa-solid fa-circle-info"></i></button></span>
+                                <span class="class-price">₹1450</span>
+                            </div>
+                            <div class="avail-badge avail-confirmed"><i class="fa-solid fa-circle-check"></i> 18 seats left</div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" style="width:auto;padding:12px 32px;font-size:14px;" onclick="bookTrain('12428'); window.location.href='passenger-details.html'">Book Now</button>
+                </div>
+            </div>
+
+            <!-- ===== TRAIN CARD 2: MAHAKAUSHAL EXPRESS ===== -->
+            <div class="train-card" data-name="MAHAKAUSHAL EXPRESS" data-number="11449">
+                <div class="tc-header">
+                    <div>
+                        <div class="tc-title train-name-text">MAHAKAUSHAL EXPRESS</div>
+                        <div class="tc-sub">#11449 | Runs: Daily</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span class="train-badge fastest-badge"><i class="fa-solid fa-bolt"></i> Fastest</span>
+                        <div class="pinned-badge" id="pin-11449" style="display:none;"><i class="fa-solid fa-thumbtack"></i> Pinned</div>
+                    </div>
+                </div>
+                <div class="tc-times">
+                    <div class="tc-time"><h3>11:20</h3><p class="tc-sub">CNB</p></div>
+                    <div class="tc-duration"><span style="position:relative;top:-8px;"><i class="fa-regular fa-clock"></i> 7h 25m</span></div>
+                    <div class="tc-time" style="text-align:right;"><h3>18:45</h3><p class="tc-sub">NDLS</p></div>
+                </div>
+                <div class="flex-between items-end mt-2">
+                    <div class="tc-classes">
+                        <div class="tc-class-box">
+                            <div class="flex-between" style="align-items:center;gap:4px;">
+                                <span class="class-name">SL <button class="info-btn" onclick="showTooltipModal('sl')"><i class="fa-solid fa-circle-info"></i></button></span>
+                                <span class="class-price">₹450</span>
+                            </div>
+                            <div class="avail-badge avail-rac">
+                                <i class="fa-solid fa-circle-half-stroke"></i> RAC 12
+                                <button class="info-btn" onclick="showTooltipModal('rac')"><i class="fa-solid fa-circle-info"></i></button>
+                            </div>
+                        </div>
+                        <div class="tc-class-box">
+                            <div class="flex-between" style="align-items:center;gap:4px;">
+                                <span class="class-name">3A <button class="info-btn" onclick="showTooltipModal('3a')"><i class="fa-solid fa-circle-info"></i></button></span>
+                                <span class="class-price">₹1320</span>
+                            </div>
+                            <div class="avail-badge avail-confirmed"><i class="fa-solid fa-circle-check"></i> 28 seats left</div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" style="width:auto;padding:12px 32px;font-size:14px;" onclick="bookTrain('11449'); window.location.href='passenger-details.html'">Book Now</button>
+                </div>
+            </div>
+
+            <!-- ===== TRAIN CARD 3: VINDHYACHAL EXPRESS ===== -->
+            <div class="train-card" data-name="VINDHYACHAL EXPRESS" data-number="12165">
+                <div class="tc-header">
+                    <div>
+                        <div class="tc-title train-name-text">VINDHYACHAL EXPRESS</div>
+                        <div class="tc-sub">#12165 | Runs: Tue, Thu, Sat</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span class="train-badge comfort-badge"><i class="fa-solid fa-couch"></i> Most Comfortable</span>
+                        <div class="pinned-badge" id="pin-12165" style="display:none;"><i class="fa-solid fa-thumbtack"></i> Pinned</div>
+                    </div>
+                </div>
+                <div class="tc-times">
+                    <div class="tc-time"><h3>14:15</h3><p class="tc-sub">CNB</p></div>
+                    <div class="tc-duration"><span style="position:relative;top:-8px;"><i class="fa-regular fa-clock"></i> 7h 45m</span></div>
+                    <div class="tc-time" style="text-align:right;"><h3>22:00</h3><p class="tc-sub">NDLS</p></div>
+                </div>
+                <div class="flex-between items-end mt-2">
+                    <div class="tc-classes">
+                        <div class="tc-class-box">
+                            <div class="flex-between" style="align-items:center;gap:4px;">
+                                <span class="class-name">3E <button class="info-btn" onclick="showTooltipModal('3e')"><i class="fa-solid fa-circle-info"></i></button></span>
+                                <span class="class-price">₹680</span>
+                            </div>
+                            <div class="avail-badge avail-confirmed"><i class="fa-solid fa-circle-check"></i> 96 seats left</div>
+                        </div>
+                        <div class="tc-class-box" style="opacity:0.85;">
+                            <div class="flex-between" style="align-items:center;gap:4px;">
+                                <span class="class-name">2A <button class="info-btn" onclick="showTooltipModal('2a')"><i class="fa-solid fa-circle-info"></i></button></span>
+                                <span class="class-price">₹2100</span>
+                            </div>
+                            <div class="avail-badge avail-wl">
+                                <i class="fa-solid fa-triangle-exclamation"></i> WL 8
+                                <button class="info-btn" onclick="showTooltipModal('wl')"><i class="fa-solid fa-circle-info"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" style="width:auto;padding:12px 32px;font-size:14px;" onclick="bookTrain('12165'); window.location.href='passenger-details.html'">Book Now</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== SIDEBAR WIDGETS ===== -->
+        <div class="widgets">
+            <div class="card" style="padding: 20px;">
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <div style="background: #eff6ff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fa-regular fa-comment-dots" style="color:#3B82F6"></i></div> Ask Disha
+                </h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.6;">Need help booking? Our AI assistant is here 24/7.</p>
+                <button class="btn-outline" style="width: 100%; padding: 8px; font-size: 13px;">Chat with Disha</button>
+            </div>
+
+            <div class="card book-by-number-card" style="padding: 20px;">
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-bolt" style="color: var(--orange);"></i> Book by Train Number
+                </h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Know your train? Jump straight to booking.</p>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="quickTrainNum" placeholder="e.g. 12428" maxlength="5"
+                        style="flex:1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: var(--text-main);"
+                        onkeydown="if(event.key==='Enter') quickBook()">
+                    <button class="btn-primary" style="width:auto; padding: 8px 14px; font-size: 13px;" onclick="quickBook()">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div id="quickBookError" style="display:none; color:#EF4444; font-size:12px; margin-top:6px;"></div>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-regular fa-calendar-check" style="color:#22C55E"></i> Fare Calendar
+                </h3>
+                <div class="fare-grid">
+                    <div class="fare-box active">Today<strong>₹720</strong></div>
+                    <div class="fare-box">Tomorrow<strong>₹770</strong></div>
+                    <div class="fare-box">+2 days<strong>₹820</strong></div>
+                    <div class="fare-box">+3 days<strong>₹870</strong></div>
+                    <div class="fare-box">+4 days<strong>₹920</strong></div>
+                    <div class="fare-box">+5 days<strong>₹970</strong></div>
+                </div>
+            </div>
+
+            <div class="card booking-tips" style="padding: 20px;">
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-regular fa-lightbulb text-orange"></i> Booking Tips
+                </h3>
+                <ul class="tips-list">
+                    <li><span class="tip-dot"></span>Book Tatkal tickets at 10:00 AM</li>
+                    <li><span class="tip-dot"></span>Check alternate trains for better availability</li>
+                    <li><span class="tip-dot"></span>Senior citizens get 40% discount</li>
+                </ul>
+            </div>
+
+            <div class="card" style="padding: 20px;">
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-arrow-trend-up" style="color: #A855F7;"></i> Popular Routes
+                </h3>
+                <div>
+                    <div class="popular-route-item"><span>Delhi — Mumbai</span><span style="font-weight: 600; color: var(--text-muted);">₹1,450</span></div>
+                    <div class="popular-route-item"><span>Bangalore — Chennai</span><span style="font-weight: 600; color: var(--text-muted);">₹850</span></div>
+                    <div class="popular-route-item"><span>Kolkata — Guwahati</span><span style="font-weight: 600; color: var(--text-muted);">₹1,200</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOOLTIP MODAL ===== -->
+    <div class="tooltip-modal-overlay" id="tooltipOverlay" onclick="closeTooltipModal()">
+        <div class="tooltip-modal" id="tooltipModal" onclick="event.stopPropagation()">
+            <button class="tooltip-modal-close" onclick="closeTooltipModal()"><i class="fa-solid fa-xmark"></i></button>
+            <div id="tooltipModalContent"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+    const TOOLTIP_INFO = {
+        sl: {
+            icon: '🛏️', title: 'SL — Sleeper Class',
+            body: 'Non-air-conditioned coaches with berths (beds). The most affordable option for long-distance travel. Best for budget travellers comfortable without AC.',
+            tag: 'Budget · No AC · Berths', tagColor: '#64748B'
+        },
+        '3a': {
+            icon: '❄️', title: '3A — AC 3 Tier',
+            body: 'Air-conditioned coaches with 3 berths stacked per section. Clean bedding provided. Great balance of comfort and price — the most popular class.',
+            tag: 'AC · Mid-range · Most Popular', tagColor: '#3B82F6'
+        },
+        '3e': {
+            icon: '💸', title: '3E — AC Economy',
+            body: 'Air-conditioned coaches with more berths per compartment, making tickets cheaper than 3A. Less privacy but great value if you want AC on a budget.',
+            tag: 'AC · Budget-AC · Good value', tagColor: '#10B981'
+        },
+        '2a': {
+            icon: '🌟', title: '2A — AC 2 Tier',
+            body: 'Air-conditioned with just 2 berths per section and curtains for privacy. More spacious and comfortable than 3A. The premium option on most trains.',
+            tag: 'AC · Premium · More Privacy', tagColor: '#8B5CF6'
+        },
+        rac: {
+            icon: '⚠️', title: 'RAC — Reservation Against Cancellation',
+            body: 'Your ticket is on a shared berth — you\'ll share a berth with one other passenger initially. If someone with a confirmed ticket cancels, you\'ll automatically get your own full berth. You are allowed to board the train.',
+            tag: 'Can board · Medium confirmation chance', tagColor: '#D97706',
+            tip: '💡 RAC passengers CAN board the train. Upgrade to a full berth is common as people cancel closer to departure.'
+        },
+        wl: {
+            icon: '🔴', title: 'WL — Waitlist',
+            body: 'No confirmed seat yet. You are in a queue — if enough people cancel, your ticket moves up and may get confirmed before the chart is prepared. If not confirmed, you cannot board.',
+            tag: 'Cannot board if unconfirmed · Risky', tagColor: '#EF4444',
+            tip: '💡 WL tickets that are not confirmed by chart preparation are automatically refunded to your payment source.'
+        },
+        quota: {
+            icon: '🎫', title: 'What is a Quota?',
+            body: 'Railways divide available seats into different quota pools. Choosing the right one can improve your chances of getting a ticket.',
+            list: [
+                { label: 'General', desc: 'Open to all. The largest pool of available seats.' },
+                { label: 'Tatkal', desc: 'Last-minute booking at a premium price. Opens 1 day before travel — 10 AM for AC classes, 11 AM for non-AC.' },
+                { label: 'Ladies', desc: 'Reserved for women travelling alone or with children under 12.' },
+                { label: 'Senior Citizen', desc: '40% discount for men aged 60+ and women aged 58+.' },
+                { label: 'Divyaang', desc: 'For persons with disabilities at concessional fares.' },
+            ]
+        },
+        classes: {
+            icon: '🚃', title: 'Train Coach Classes Explained',
+            body: 'Here\'s a quick guide to all travel classes, from most affordable to most premium:',
+            list: [
+                { label: 'SL — Sleeper', desc: 'Non-AC berths. Cheapest option for overnight travel.' },
+                { label: '3E — AC Economy', desc: 'Budget AC with more berths per coach. Less privacy.' },
+                { label: '3A — AC 3 Tier', desc: 'Standard AC with 3 berths per bay. Bedding included.' },
+                { label: '2A — AC 2 Tier', desc: 'Premium AC with 2 berths and curtains for privacy.' },
+                { label: '1A — First Class AC', desc: 'Most premium. Private cabins with full bedding service.' },
+            ]
+        },
+        availability: {
+            icon: '🟢', title: 'What Do Availability Statuses Mean?',
+            body: 'Here\'s a clear guide to what each status means before you book:',
+            list: [
+                { label: 'AVL — Available', desc: 'Seats are open. Booking is confirmed instantly.', color: '#16A34A' },
+                { label: 'RAC — Reservation Against Cancellation', desc: 'Shared berth. You can board. May get a full berth if someone cancels.', color: '#D97706' },
+                { label: 'WL — Waitlist', desc: 'No seat yet. Cannot board if unconfirmed at chart time.', color: '#EF4444' },
+            ]
+        }
+    };
+
+    function showTooltipModal(key) {
+        const data = TOOLTIP_INFO[key];
+        if (!data) return;
+        const overlay = document.getElementById('tooltipOverlay');
+        const content = document.getElementById('tooltipModalContent');
+
+        let html = `
+            <div style="font-size:38px;margin-bottom:10px;">${data.icon}</div>
+            <h3 style="font-size:17px;font-weight:700;color:var(--primary);margin-bottom:8px;">${data.title}</h3>
+            <p style="font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:12px;">${data.body}</p>
+        `;
+        if (data.list) {
+            html += `<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px;">`;
+            data.list.forEach(item => {
+                html += `<div style="background:#f8fafc;border:1px solid var(--border);border-radius:6px;padding:9px 12px;">
+                    <div style="font-weight:700;font-size:13px;color:var(--primary);margin-bottom:2px;">${item.label}</div>
+                    <div style="font-size:12px;color:var(--text-muted);">${item.desc}</div>
+                </div>`;
+            });
+            html += `</div>`;
+        }
+        if (data.tag) {
+            html += `<span style="display:inline-block;background:${data.tagColor}18;color:${data.tagColor};border:1px solid ${data.tagColor}40;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:10px;">${data.tag}</span>`;
+        }
+        if (data.tip) {
+            html += `<div style="background:#FFF7ED;border:1px solid #fdba74;border-radius:6px;padding:10px 12px;font-size:13px;color:#92400e;margin-top:8px;line-height:1.5;">${data.tip}</div>`;
+        }
+        content.innerHTML = html;
+        overlay.classList.add('show');
+    }
+
+    function closeTooltipModal() {
+        document.getElementById('tooltipOverlay').classList.remove('show');
+    }
+
+    function setSort(el) {
+        document.querySelectorAll('.smart-sort-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
+    </script>
+</body>
+</html>

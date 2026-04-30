@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment — IRCTC</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ── Payment-specific styles ── */
+        .pay-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin: 0 0 14px;
+        }
+
+        /* Payment method tiles */
+        .pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .pay-tile {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: border-color .18s, background .18s, box-shadow .18s;
+            background: white;
+            position: relative;
+        }
+        .pay-tile:hover { border-color: #93C5FD; background: #EFF6FF; }
+        .pay-tile.selected { border-color: var(--orange); background: #FFF7ED; box-shadow: 0 0 0 2px rgba(242,101,34,.15); }
+        .pay-tile.selected::after {
+            content: '\f058';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 8px; right: 10px;
+            font-size: 14px;
+            color: var(--orange);
+        }
+        .pay-tile-icon {
+            width: 38px; height: 38px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .pay-tile-label { font-size: 13px; font-weight: 600; color: var(--primary); }
+        .pay-tile-sub   { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* UPI input */
+        .upi-row { display: flex; gap: 8px; margin-top: 14px; }
+        .upi-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+        .upi-row input:focus { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange); outline: none; }
+        .upi-row button { background: var(--primary); color: white; padding: 10px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+        .upi-row button:hover { background: #1e4d8c; }
+
+        /* Card fields */
+        .card-fields { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card-fields .full { grid-column: 1 / -1; }
+        .card-fields input {
+            width: 100%; padding: 10px 12px;
+            border: 1px solid var(--border); border-radius: 6px;
+            font-size: 14px; color: var(--text-main);
+        }
+        .card-fields input:focus { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange); outline: none; }
+        .card-fields label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
+
+        /* Fare summary rows */
+        .fare-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-muted); padding: 7px 0; border-bottom: 1px dashed #f1f5f9; }
+        .fare-row:last-of-type { border: none; }
+        .fare-total { display: flex; justify-content: space-between; align-items: center; font-size: 17px; font-weight: 700; color: var(--primary); padding-top: 12px; margin-top: 4px; border-top: 2px solid var(--border); }
+
+        /* Security badges */
+        .trust-bar { display: flex; gap: 18px; align-items: center; margin-top: 16px; padding: 12px 16px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--border); }
+        .trust-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); font-weight: 500; }
+        .trust-item i { font-size: 14px; color: var(--success); }
+
+        /* Journey summary ribbon */
+        .journey-ribbon {
+            background: linear-gradient(90deg, #1A3A6B 0%, #1e4d8c 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .jr-route { font-size: 18px; font-weight: 700; letter-spacing: .02em; }
+        .jr-meta  { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 4px; }
+        .jr-badge { background: rgba(255,255,255,.15); border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; text-align: center; }
+
+        /* ── ERROR RECOVERY PANEL ── */
+        .error-panel {
+            display: none;
+            border: 1.5px solid #FCA5A5;
+            border-radius: 12px;
+            background: #FFF5F5;
+            padding: 0;
+            margin-bottom: 24px;
+            overflow: hidden;
+            animation: slideIn .35s cubic-bezier(.175,.885,.32,1.275);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .error-panel.show { display: block; }
+
+        .error-panel-header {
+            background: linear-gradient(90deg, #DC2626, #EF4444);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+        .error-panel-header i { font-size: 20px; }
+        .error-panel-title  { font-size: 15px; font-weight: 700; }
+        .error-panel-sub    { font-size: 12px; opacity: .85; margin-top: 1px; }
+
+        .error-panel-body { padding: 20px; }
+
+        .error-context {
+            display: flex; gap: 12px; align-items: flex-start;
+            background: white;
+            border: 1px solid #FECACA;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+        .error-context-icon { font-size: 20px; color: #DC2626; flex-shrink: 0; margin-top: 1px; }
+        .error-context-msg  { font-size: 13px; color: #7F1D1D; line-height: 1.55; }
+        .error-context-msg strong { display: block; font-size: 14px; margin-bottom: 3px; color: #991B1B; }
+        .error-code { font-size: 10px; color: #B91C1C; background: #FEE2E2; padding: 2px 6px; border-radius: 4px; font-family: monospace; margin-top: 6px; display: inline-block; }
+
+        /* Suggested actions */
+        .error-actions-label { font-size: 12px; font-weight: 600; color: #991B1B; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .07em; }
+        .error-action-list   { display: flex; flex-direction: column; gap: 8px; }
+        .error-action-btn {
+            display: flex; align-items: center; gap: 12px;
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            transition: all .18s;
+            font-family: inherit;
+        }
+        .error-action-btn:hover { transform: translateX(3px); }
+        .eab-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .eab-text  { flex: 1; }
+        .eab-label { font-size: 13px; font-weight: 600; }
+        .eab-desc  { font-size: 11px; margin-top: 2px; }
+        .eab-arrow { color: #94A3B8; font-size: 11px; }
+
+        .eab-retry  { border-color: #BFDBFE; }
+        .eab-retry:hover  { background: #EFF6FF; border-color: #3B82F6; }
+        .eab-retry  .eab-icon  { background: #DBEAFE; color: #1D4ED8; }
+        .eab-retry  .eab-label { color: #1E40AF; }
+        .eab-retry  .eab-desc  { color: #3B82F6; }
+
+        .eab-modify { border-color: #FDE68A; }
+        .eab-modify:hover { background: #FFFBEB; border-color: #F59E0B; }
+        .eab-modify .eab-icon  { background: #FEF3C7; color: #B45309; }
+        .eab-modify .eab-label { color: #92400E; }
+        .eab-modify .eab-desc  { color: #D97706; }
+
+        .eab-alt    { border-color: #D9F99D; }
+        .eab-alt:hover    { background: #F7FEE7; border-color: #65A30D; }
+        .eab-alt    .eab-icon  { background: #ECFCCB; color: #3F6212; }
+        .eab-alt    .eab-label { color: #365314; }
+        .eab-alt    .eab-desc  { color: #65A30D; }
+
+        .error-dismiss { margin-top: 14px; display: flex; justify-content: flex-end; }
+        .error-dismiss button { background: none; border: none; font-size: 12px; color: #94A3B8; cursor: pointer; font-family: inherit; text-decoration: underline; }
+        .error-dismiss button:hover { color: #64748B; }
+
+        /* Simulate error button (demo) */
+        .demo-bar { background: #0F172A; padding: 8px 24px; font-size: 12px; color: #94A3B8; display: flex; align-items: center; gap: 16px; }
+        .demo-bar span { color: #F59E0B; font-weight: 700; }
+        .demo-btn {
+            background: #1E293B; border: 1px solid #334155; color: #CBD5E1;
+            padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;
+            font-family: inherit; transition: .15s;
+        }
+        .demo-btn:hover { background: #334155; color: white; }
+        .demo-btn.active { background: #DC2626; border-color: #DC2626; color: white; }
+
+        /* Pay button pulse on success-ready */
+        .btn-pay {
+            background: var(--orange); color: white;
+            font-weight: 700; font-size: 16px;
+            padding: 15px 32px;
+            border-radius: 8px;
+            width: 100%;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            transition: background .2s, transform .1s;
+            letter-spacing: .02em;
+            border: none; cursor: pointer; font-family: inherit;
+        }
+        .btn-pay:hover { background: var(--orange-hover); transform: translateY(-1px); }
+        .btn-pay:active { transform: translateY(0); }
+
+        .pci-logos { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+        .pci-logos img { height: 22px; filter: grayscale(1); opacity: .5; }
+        .pci-text { font-size: 10px; color: var(--text-muted); }
+
+        /* Countdown */
+        #payCountdown { font-size: 22px; font-weight: 700; color: #DC2626; }
+        .countdown-warn { color: #DC2626 !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+        /* Offer chip */
+        .offer-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: #DCFCE7; color: #15803D;
+            border: 1px solid #bbf7d0;
+            border-radius: 20px; font-size: 11px; font-weight: 600;
+            padding: 3px 10px; margin-bottom: 12px;
+        }
+
+        .btn-nav { background: #334155; color: #CBD5E1; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-nav:hover { background: #475569; color: white; }
+
+        @media (max-width: 640px) {
+            .pay-grid { grid-template-columns: 1fr; }
+            .card-fields { grid-template-columns: 1fr; }
+            .card-fields .full { grid-column: 1; }
+            .trust-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .journey-ribbon { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="logo-area">
+        <img src="irctc-logo.png" alt="IRCTC" style="height:44px; width:auto; flex-shrink:0; background:white; border-radius:4px;">
+        <div class="logo-text" style="margin-left:4px;">
+            <p style="font-size:10px; color:#cbd5e1; line-height:1.3;">Indian Railway Catering<br>and Tourism Corporation Ltd.</p>
+        </div>
+    </div>
+    <div class="header-actions">
+        <button class="btn-account"><i class="fa-regular fa-user"></i> My Account</button>
+    </div>
+</header>
+
+<!-- PROTOTYPE NAV -->
+<div class="prototype-bar">
+    <span>Screen 4 of 4 — Payment</span>
+    <a href="passenger-details.html" class="btn-nav"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    <a href="index.html" class="btn-nav">Home <i class="fa-solid fa-house"></i></a>
+</div>
+
+<!-- DEMO CONTROLS BAR -->
+<div class="demo-bar">
+    <span>⚡ PROTOTYPE DEMO</span>
+    <button class="demo-btn" id="demoErrorBtn" onclick="toggleErrorSimulation()">
+        <i class="fa-solid fa-triangle-exclamation"></i> Simulate Payment Failure
+    </button>
+    <button class="demo-btn" onclick="showToast('✓ Toast notification test')">Test Toast</button>
+    <span style="margin-left: auto; color: #475569;">Toggle error recovery UI to see contextual error handling</span>
+</div>
+
+<!-- TRAIN CONTEXT BAR -->
+<div style="background:#EEF2FF; border-bottom:1px solid #C7D2FE; padding:10px 24px;">
+    <div style="max-width:1000px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; align-items:center; gap:16px; font-size:13px;">
+            <span style="font-weight:700; color:var(--primary); font-size:14px;">
+                <i class="fa-solid fa-train" style="margin-right:6px; color:var(--orange);"></i>REWA EXPRESS
+                <span style="font-weight:400; color:var(--text-muted);">#12428</span>
+            </span>
+            <span style="color:var(--text-muted);">|</span>
+            <span style="color:var(--text-muted);">CNB <i class="fa-solid fa-arrow-right" style="margin:0 4px; font-size:10px;"></i> NDLS</span>
+            <span style="color:var(--text-muted);">|</span>
+            <span style="color:var(--text-muted);"><i class="fa-regular fa-calendar" style="margin-right:4px;"></i>08 May 2026</span>
+            <span style="color:var(--text-muted);">|</span>
+            <span style="background:#DCFCE7; color:#166534; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px;">3A · AVL 45</span>
+        </div>
+        <a href="search-results.html" style="font-size:12px; color:var(--orange); font-weight:600; text-decoration:none;">
+            <i class="fa-solid fa-pen" style="margin-right:4px;"></i>Change Train
+        </a>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="container" style="max-width:1000px;">
+
+    <!-- STEPPER — all 4 steps, step 4 active -->
+    <div class="stepper">
+        <div class="step completed"><div class="step-circle"><i class="fa-solid fa-check"></i></div><div class="step-label">Search</div></div>
+        <div class="step completed"><div class="step-circle"><i class="fa-solid fa-check"></i></div><div class="step-label">Select Train</div></div>
+        <div class="step completed"><div class="step-circle"><i class="fa-solid fa-check"></i></div><div class="step-label">Passenger Details</div></div>
+        <div class="step active"><div class="step-circle">4</div><div class="step-label">Payment</div></div>
+    </div>
+
+    <!-- ERROR RECOVERY PANEL (hidden until triggered) -->
+    <div class="error-panel" id="errorPanel">
+        <div class="error-panel-header">
+            <i class="fa-solid fa-circle-xmark"></i>
+            <div>
+                <div class="error-panel-title">Payment Could Not Be Processed</div>
+                <div class="error-panel-sub">Your transaction was declined. No amount has been deducted.</div>
+            </div>
+        </div>
+        <div class="error-panel-body">
+            <div class="error-context">
+                <i class="fa-solid fa-credit-card error-context-icon"></i>
+                <div class="error-context-msg">
+                    <strong>Bank declined the transaction</strong>
+                    Your issuing bank returned an authorization failure. This is often caused by
+                    insufficient funds, daily transaction limits, or a temporary block by your bank.
+                    <span class="error-code">ERR_BANK_DECLINE · TXN#IRCTC20260508-7821-X</span>
+                </div>
+            </div>
+
+            <div class="error-actions-label"><i class="fa-solid fa-bolt" style="margin-right:5px;"></i>Suggested Actions</div>
+            <div class="error-action-list">
+                <button class="error-action-btn eab-retry" onclick="retryPayment()">
+                    <div class="eab-icon"><i class="fa-solid fa-rotate-right"></i></div>
+                    <div class="eab-text">
+                        <div class="eab-label">Retry Payment</div>
+                        <div class="eab-desc">Try again with the same card or enter new card details</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right eab-arrow"></i>
+                </button>
+                <button class="error-action-btn eab-modify" onclick="modifyDetails()">
+                    <div class="eab-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+                    <div class="eab-text">
+                        <div class="eab-label">Modify Payment Details</div>
+                        <div class="eab-desc">Switch to UPI, Net Banking, or a different card</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right eab-arrow"></i>
+                </button>
+                <button class="error-action-btn eab-alt" onclick="selectAlternateTrain()">
+                    <div class="eab-icon"><i class="fa-solid fa-train-subway"></i></div>
+                    <div class="eab-text">
+                        <div class="eab-label">Select Alternate Train</div>
+                        <div class="eab-desc">View other trains on CNB → NDLS for 08 May 2026</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right eab-arrow"></i>
+                </button>
+            </div>
+            <div class="error-dismiss">
+                <button onclick="dismissError()">Dismiss this message</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <!-- LEFT: Payment form -->
+        <div>
+            <!-- Journey summary -->
+            <div class="journey-ribbon">
+                <div>
+                    <div class="jr-route">CNB → NDLS</div>
+                    <div class="jr-meta">08 May 2026 &nbsp;·&nbsp; REWA EXPRESS #12428 &nbsp;·&nbsp; 3A Class</div>
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <div class="jr-badge"><div style="font-size:10px;opacity:.7;margin-bottom:2px;">PASSENGER</div>Rahul Kumar · 32 · M</div>
+                    <div class="jr-badge"><div style="font-size:10px;opacity:.7;margin-bottom:2px;">BERTH</div>Lower Preferred</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="pay-section-title"><i class="fa-solid fa-wallet" style="margin-right:6px;color:var(--orange);"></i>Select Payment Method</h2>
+
+                <div class="pay-grid">
+                    <div class="pay-tile selected" id="tile-upi" onclick="selectPayMethod('upi')">
+                        <div class="pay-tile-icon" style="background:#EFF6FF; color:#1D4ED8;"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                        <div>
+                            <div class="pay-tile-label">UPI</div>
+                            <div class="pay-tile-sub">GPay, PhonePe, Paytm</div>
+                        </div>
+                    </div>
+                    <div class="pay-tile" id="tile-card" onclick="selectPayMethod('card')">
+                        <div class="pay-tile-icon" style="background:#F0FDF4; color:#15803D;"><i class="fa-solid fa-credit-card"></i></div>
+                        <div>
+                            <div class="pay-tile-label">Debit / Credit Card</div>
+                            <div class="pay-tile-sub">Visa, Mastercard, RuPay</div>
+                        </div>
+                    </div>
+                    <div class="pay-tile" id="tile-netbank" onclick="selectPayMethod('netbank')">
+                        <div class="pay-tile-icon" style="background:#FFF7ED; color:#C2410C;"><i class="fa-solid fa-building-columns"></i></div>
+                        <div>
+                            <div class="pay-tile-label">Net Banking</div>
+                            <div class="pay-tile-sub">All major banks</div>
+                        </div>
+                    </div>
+                    <div class="pay-tile" id="tile-wallet" onclick="selectPayMethod('wallet')">
+                        <div class="pay-tile-icon" style="background:#F5F3FF; color:#6D28D9;"><i class="fa-solid fa-wallet"></i></div>
+                        <div>
+                            <div class="pay-tile-label">Wallet</div>
+                            <div class="pay-tile-sub">Airtel, Mobikwik, Jio</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UPI fields -->
+                <div id="fields-upi">
+                    <div class="offer-chip"><i class="fa-solid fa-tag"></i> ₹5 cashback on UPI payments above ₹500</div>
+                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">Enter your UPI ID or scan QR from your payment app</div>
+                    <div class="upi-row">
+                        <input type="text" id="upiId" placeholder="yourname@upi" value="rahul@okaxis">
+                        <button onclick="verifyUPI()"><i class="fa-solid fa-circle-check" style="margin-right:5px;"></i>Verify</button>
+                    </div>
+                    <div id="upiStatus" style="font-size:12px; color:var(--success); margin-top:8px; display:none;">
+                        <i class="fa-solid fa-circle-check"></i> VPA verified · Rahul Kumar
+                    </div>
+                    <div style="margin-top:16px; text-align:center; color:var(--text-muted); font-size:13px; position:relative;">
+                        <div style="border-top:1px solid var(--border); position:absolute; top:50%; left:0; right:0;"></div>
+                        <span style="background:white; padding:0 12px; position:relative;">or scan QR</span>
+                    </div>
+                    <div style="text-align:center; margin-top:14px;">
+                        <!-- Placeholder QR -->
+                        <svg width="100" height="100" viewBox="0 0 100 100" style="border:2px solid var(--border); border-radius:8px; padding:6px;">
+                            <rect width="100" height="100" fill="white"/>
+                            <g fill="#1A3A6B">
+                                <rect x="8" y="8" width="28" height="28" rx="3"/>
+                                <rect x="12" y="12" width="20" height="20" rx="1" fill="white"/>
+                                <rect x="16" y="16" width="12" height="12" rx="1"/>
+                                <rect x="64" y="8" width="28" height="28" rx="3"/>
+                                <rect x="68" y="12" width="20" height="20" rx="1" fill="white"/>
+                                <rect x="72" y="16" width="12" height="12" rx="1"/>
+                                <rect x="8" y="64" width="28" height="28" rx="3"/>
+                                <rect x="12" y="68" width="20" height="20" rx="1" fill="white"/>
+                                <rect x="16" y="72" width="12" height="12" rx="1"/>
+                                <rect x="44" y="8" width="8" height="8"/><rect x="56" y="8" width="8" height="8"/>
+                                <rect x="44" y="20" width="8" height="8"/><rect x="56" y="20" width="8" height="8"/>
+                                <rect x="44" y="32" width="8" height="8"/>
+                                <rect x="44" y="44" width="8" height="8"/><rect x="56" y="44" width="8" height="8"/>
+                                <rect x="64" y="44" width="8" height="8"/><rect x="76" y="44" width="8" height="8"/>
+                                <rect x="88" y="44" width="8" height="8"/>
+                                <rect x="44" y="56" width="8" height="8"/>
+                                <rect x="64" y="56" width="8" height="8"/><rect x="76" y="56" width="8" height="8"/>
+                                <rect x="44" y="68" width="8" height="8"/><rect x="56" y="68" width="8" height="8"/>
+                                <rect x="76" y="68" width="8" height="8"/><rect x="88" y="68" width="8" height="8"/>
+                                <rect x="44" y="80" width="8" height="8"/>
+                                <rect x="64" y="80" width="8" height="8"/><rect x="76" y="80" width="8" height="8"/>
+                                <rect x="8" y="44" width="8" height="8"/><rect x="20" y="44" width="8" height="8"/>
+                                <rect x="32" y="44" width="8" height="8"/>
+                                <rect x="8" y="56" width="8" height="8"/>
+                                <rect x="20" y="56" width="8" height="8"/><rect x="32" y="56" width="8" height="8"/>
+                                <rect x="8" y="80" width="8" height="8"/><rect x="20" y="80" width="8" height="8"/>
+                                <rect x="32" y="80" width="8" height="8"/>
+                            </g>
+                        </svg>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">Scan with any UPI app</div>
+                    </div>
+                </div>
+
+                <!-- Card fields -->
+                <div id="fields-card" style="display:none;">
+                    <div class="card-fields">
+                        <div class="full">
+                            <label>Card Number</label>
+                            <input type="text" placeholder="1234  5678  9012  3456" maxlength="19" oninput="formatCard(this)">
+                        </div>
+                        <div>
+                            <label>Cardholder Name</label>
+                            <input type="text" placeholder="As on card">
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div>
+                                <label>Expiry</label>
+                                <input type="text" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+                            </div>
+                            <div>
+                                <label>CVV</label>
+                                <input type="password" placeholder="•••" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; margin-top:8px;">
+                        <input type="checkbox" checked style="accent-color:var(--orange);"> Save card for future bookings (Secured by tokenisation)
+                    </label>
+                </div>
+
+                <!-- Net Banking -->
+                <div id="fields-netbank" style="display:none;">
+                    <div class="input-group">
+                        <label>Select Your Bank</label>
+                        <select style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:6px; font-size:14px;">
+                            <option>State Bank of India</option>
+                            <option>HDFC Bank</option>
+                            <option>ICICI Bank</option>
+                            <option>Axis Bank</option>
+                            <option>Kotak Mahindra Bank</option>
+                            <option>Punjab National Bank</option>
+                            <option>Bank of Baroda</option>
+                            <option>Canara Bank</option>
+                        </select>
+                    </div>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:10px;"><i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>You'll be redirected to your bank's secure portal to complete the payment.</p>
+                </div>
+
+                <!-- Wallet -->
+                <div id="fields-wallet" style="display:none;">
+                    <div class="pay-grid" style="margin-bottom:0;">
+                        <div class="pay-tile" style="border-color:var(--border);" onclick="this.style.borderColor='var(--orange)'">
+                            <div class="pay-tile-icon" style="background:#FFF7ED; color:#F26522; font-weight:900; font-size:15px;">✈</div>
+                            <div><div class="pay-tile-label">Airtel Money</div><div class="pay-tile-sub">Balance: ₹200</div></div>
+                        </div>
+                        <div class="pay-tile" onclick="this.style.borderColor='var(--orange)'">
+                            <div class="pay-tile-icon" style="background:#EFF6FF; color:#1D4ED8; font-weight:900; font-size:15px;">M</div>
+                            <div><div class="pay-tile-label">Mobikwik</div><div class="pay-tile-sub">Balance: ₹0</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex-between" style="gap:12px; margin-bottom:24px;">
+                <a href="passenger-details.html" class="btn-outline" style="padding:12px 20px;">
+                    <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>Back
+                </a>
+                <button class="btn-pay" onclick="processPayment()">
+                    <i class="fa-solid fa-lock"></i>
+                    Pay Securely · ₹838.17
+                </button>
+            </div>
+
+            <!-- Trust bar -->
+            <div class="trust-bar">
+                <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> 256-bit SSL Encryption</div>
+                <div class="trust-item"><i class="fa-solid fa-circle-check"></i> PCI DSS Compliant</div>
+                <div class="trust-item"><i class="fa-solid fa-lock"></i> 3D Secure Verified</div>
+                <div class="trust-item"><i class="fa-solid fa-rotate"></i> Instant Refund on Failure</div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Fare summary + timer -->
+        <div>
+            <div class="card">
+                <h3 style="font-size:16px; font-weight:700; color:var(--primary); margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+                    Fare Summary
+                    <span style="font-size:11px; font-weight:400; color:var(--text-muted);">incl. all taxes</span>
+                </h3>
+
+                <div class="fare-row"><span>Ticket Fare (1 Pax · 3A)</span><span>₹720.00</span></div>
+                <div class="fare-row"><span>Reservation Charges</span><span>₹40.00</span></div>
+                <div class="fare-row"><span>Superfast Charges</span><span>₹30.00</span></div>
+                <div class="fare-row"><span>Service Tax (GST @5%)</span><span>₹47.25</span></div>
+                <div class="fare-row">
+                    <span>Travel Insurance <a href="#" onclick="showInsuranceInfo(); return false;" style="color:var(--orange); font-size:11px;">(optional)</a></span>
+                    <span>₹0.92</span>
+                </div>
+                <div class="fare-row">
+                    <span style="color:var(--success);">UPI Cashback</span>
+                    <span style="color:var(--success);" id="upiDiscount">− ₹5.00</span>
+                </div>
+                <div class="fare-total">
+                    <span>Total Payable</span>
+                    <span id="totalDisplay">₹833.17</span>
+                </div>
+            </div>
+
+            <!-- Booking timer -->
+            <div class="card" style="text-align:center;">
+                <div style="color:#DC2626; font-size:26px; margin-bottom:6px;"><i class="fa-regular fa-clock"></i></div>
+                <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">Complete Payment Within</div>
+                <div id="payCountdown">11:59</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">Seat is held for you. Timer cannot be paused.</div>
+            </div>
+
+            <!-- IRCTC security note -->
+            <div class="card" style="padding:16px;">
+                <div style="display:flex; gap:10px; align-items:flex-start;">
+                    <i class="fa-solid fa-shield-halved" style="color:var(--primary); font-size:20px; margin-top:2px; flex-shrink:0;"></i>
+                    <div>
+                        <div style="font-size:13px; font-weight:600; color:var(--primary); margin-bottom:4px;">IRCTC Secure Payments</div>
+                        <div style="font-size:12px; color:var(--text-muted); line-height:1.55;">
+                            Payments are processed by the Railway Ministry's authorised payment gateway.
+                            Your card data is never stored on IRCTC servers.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cancellation policy -->
+            <div class="card" style="padding:16px;">
+                <div style="font-size:13px; font-weight:600; color:var(--primary); margin-bottom:10px;"><i class="fa-solid fa-rotate-left" style="margin-right:6px; color:var(--orange);"></i>Cancellation Charges (3A)</div>
+                <div style="font-size:12px; color:var(--text-muted); display:flex; flex-direction:column; gap:7px; line-height:1.5;">
+                    <div class="flex-between"><span>More than 48 hrs before</span><span style="color:var(--success);">₹90 flat</span></div>
+                    <div class="flex-between"><span>12 – 48 hrs before</span><span style="color:#A16207;">25% of fare</span></div>
+                    <div class="flex-between"><span>Less than 12 hrs</span><span style="color:#DC2626;">50% of fare</span></div>
+                    <div class="flex-between"><span>After chart preparation</span><span style="color:#DC2626;">No refund</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Insurance info modal -->
+<div class="modal-overlay" id="insuranceModal">
+    <div class="modal">
+        <div style="font-size:36px; margin-bottom:12px;">🛡️</div>
+        <h3 style="color:var(--primary); margin-bottom:8px;">Travel Insurance — ₹0.92</h3>
+        <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:20px;">
+            Covers accidental death (₹10 lakh), permanent total disability (₹10 lakh), hospitalisation expenses (up to ₹2 lakh), and trip delay compensation. Provided by IRCTC in partnership with New India Assurance.
+        </p>
+        <button class="btn-primary" onclick="closeInsuranceModal()" style="width:auto; padding:10px 32px;">Got it</button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="saveToast" class="toast"></div>
+
+<script src="script.js"></script>
+<script>
+// ── Countdown timer ──
+let seconds = 719; // 11:59
+function updateTimer() {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    const el = document.getElementById('payCountdown');
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (seconds <= 60) el.classList.add('countdown-warn');
+    else el.classList.remove('countdown-warn');
+    if (seconds > 0) { seconds--; setTimeout(updateTimer, 1000); }
+    else { el.textContent = '00:00'; el.style.color = '#DC2626'; }
+}
+updateTimer();
+
+// ── Payment method switching ──
+function selectPayMethod(method) {
+    ['upi','card','netbank','wallet'].forEach(m => {
+        document.getElementById('tile-' + m).classList.remove('selected');
+        document.getElementById('fields-' + m).style.display = 'none';
+    });
+    document.getElementById('tile-' + method).classList.add('selected');
+    document.getElementById('fields-' + method).style.display = '';
+
+    // UPI cashback only for UPI
+    const disc = document.getElementById('upiDiscount');
+    const tot  = document.getElementById('totalDisplay');
+    if (method === 'upi') { disc.style.display = ''; tot.textContent = '₹833.17'; }
+    else { disc.style.display = 'none'; tot.textContent = '₹838.17'; }
+}
+
+// ── UPI verify ──
+function verifyUPI() {
+    const status = document.getElementById('upiStatus');
+    status.style.display = 'block';
+    showToast('✓ UPI ID verified successfully');
+}
+
+// ── Card formatting ──
+function formatCard(inp) {
+    let v = inp.value.replace(/\D/g,'').slice(0,16);
+    inp.value = v.match(/.{1,4}/g)?.join('  ') || v;
+}
+function formatExpiry(inp) {
+    let v = inp.value.replace(/\D/g,'');
+    if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2,4);
+    inp.value = v;
+}
+
+// ── Process payment (demo) ──
+let errorSimEnabled = false;
+function toggleErrorSimulation() {
+    errorSimEnabled = !errorSimEnabled;
+    const btn = document.getElementById('demoErrorBtn');
+    btn.classList.toggle('active', errorSimEnabled);
+    btn.innerHTML = errorSimEnabled
+        ? '<i class="fa-solid fa-circle-xmark"></i> Error Simulation ON'
+        : '<i class="fa-solid fa-triangle-exclamation"></i> Simulate Payment Failure';
+    if (!errorSimEnabled) { document.getElementById('errorPanel').classList.remove('show'); }
+}
+
+function processPayment() {
+    if (errorSimEnabled) {
+        document.getElementById('errorPanel').classList.add('show');
+        document.getElementById('errorPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('⚠ Payment failed · See error panel above');
+        return;
+    }
+    showToast('⏳ Processing payment...');
+    setTimeout(() => showToast('✅ Payment successful! Ticket booked.'), 2000);
+}
+
+// ── Error recovery actions ──
+function retryPayment() {
+    document.getElementById('errorPanel').classList.remove('show');
+    showToast('↺ Ready to retry — please check card details');
+    // Optionally highlight card method
+    selectPayMethod('card');
+}
+
+function modifyDetails() {
+    document.getElementById('errorPanel').classList.remove('show');
+    showToast('✎ Select a different payment method below');
+    // Scroll to payment method section
+    document.querySelector('.pay-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function selectAlternateTrain() {
+    showToast('→ Redirecting to train selection...');
+    setTimeout(() => { window.location.href = 'search-results.html'; }, 1200);
+}
+
+function dismissError() {
+    document.getElementById('errorPanel').classList.remove('show');
+}
+
+// ── Insurance modal ──
+function showInsuranceInfo() {
+    document.getElementById('insuranceModal').classList.add('show');
+}
+function closeInsuranceModal() {
+    document.getElementById('insuranceModal').classList.remove('show');
+}
+document.getElementById('insuranceModal').addEventListener('click', function(e) {
+    if (e.target === this) closeInsuranceModal();
+});
+
+// ── Toast ──
+function showToast(msg) {
+    const t = document.getElementById('saveToast');
+    t.innerHTML = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

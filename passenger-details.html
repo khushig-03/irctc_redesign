@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Details - IRCTC</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo-area">
+            <img src="irctc-logo.png" alt="IRCTC" style="height:44px; width:auto; flex-shrink:0; background:white; border-radius:4px;">
+            <div class="logo-text" style="margin-left:4px;">
+                <p style="font-size:10px; color:#cbd5e1; line-height:1.3;">Indian Railway Catering<br>and Tourism Corporation Ltd.</p>
+            </div>
+        </div>
+        <div class="header-actions"><button class="btn-account"><i class="fa-regular fa-user"></i> My Account</button></div>
+    </header>
+
+    <div class="prototype-bar">
+        <span>Screen 3 of 4 — Passenger Details</span>
+        <a href="search-results.html" class="btn-nav">
+            <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+        <a href="payment.html" class="btn-nav">
+            Forward <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Train context bar -->
+    <div style="background: #EEF2FF; border-bottom: 1px solid #C7D2FE; padding: 10px 24px;">
+        <div style="max-width: 1000px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 16px; font-size: 13px;">
+                <span style="font-weight: 700; color: var(--primary); font-size: 14px;"><i class="fa-solid fa-train" style="margin-right: 6px; color: var(--orange);"></i>REWA EXPRESS <span style="font-weight: 400; color: var(--text-muted);">#12428</span></span>
+                <span style="color: var(--text-muted);">|</span>
+                <span style="color: var(--text-muted);">CNB <i class="fa-solid fa-arrow-right" style="margin: 0 4px; font-size: 10px;"></i> NDLS</span>
+                <span style="color: var(--text-muted);">|</span>
+                <span style="color: var(--text-muted);"><i class="fa-regular fa-calendar" style="margin-right: 4px;"></i>08 May 2026</span>
+                <span style="color: var(--text-muted);">|</span>
+                <span style="background: #DCFCE7; color: #166534; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px;">3A · AVL 45</span>
+            </div>
+            <a href="search-results.html" style="font-size: 12px; color: var(--orange); font-weight: 600; text-decoration: none;"><i class="fa-solid fa-pen" style="margin-right: 4px;"></i>Change Train</a>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1000px;">
+        <div class="stepper">
+            <div class="step completed"><div class="step-circle"><i class="fa-solid fa-check"></i></div><div class="step-label">Search</div></div>
+            <div class="step completed"><div class="step-circle"><i class="fa-solid fa-check"></i></div><div class="step-label">Select Train</div></div>
+            <div class="step active"><div class="step-circle">3</div><div class="step-label">Passenger Details</div></div>
+            <div class="step"><div class="step-circle">4</div><div class="step-label">Payment</div></div>
+        </div>
+
+        <div class="alert-success">
+            <i class="fa-regular fa-circle-check" style="font-size: 18px;"></i>
+            <div>
+                <strong>Booking Resumed</strong>
+                <p>Your details have been restored from your previous session.</p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <div class="card">
+                    <div class="flex-between mb-4 border-b pb-2" style="border-bottom: 1px solid var(--border);">
+                        <h2 class="card-title" style="margin: 0;">Passenger 1</h2>
+                        <span style="font-size: 12px; background: #E0E7FF; color: #4338CA; padding: 2px 8px; border-radius: 4px;">Primary</span>
+                    </div>
+                    
+                    <form id="passengerForm">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Name (as per ID)</label>
+                                <input type="text" value="Rahul Kumar" class="auto-save">
+                            </div>
+                            <div class="input-group">
+                                <label>Age</label>
+                                <input type="number" value="32" class="auto-save">
+                            </div>
+                            <div class="input-group">
+                                <label>Gender</label>
+                                <select class="auto-save"><option>Male</option><option>Female</option></select>
+                            </div>
+                            <div class="input-group">
+                                <label style="display:flex;align-items:center;gap:4px;">Berth Preference <button class="info-btn" onclick="alert('Lower — Easy to get in/out, preferred by elderly.\nMiddle — Less movement, moderate comfort.\nUpper — Most privacy, slight climb required.')" style="font-size:12px;"><i class="fa-solid fa-circle-info"></i></button></label>
+                                <select class="auto-save"><option>Lower</option><option>Middle</option><option>Upper</option></select>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size: 14px; margin: 24px 0 12px; color: var(--primary);">Contact Details</h3>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Mobile Number</label>
+                                <input type="tel" value="9876543210" class="auto-save">
+                            </div>
+                            <div class="input-group">
+                                <label>Email Address</label>
+                                <input type="email" value="rahul@example.com" class="auto-save">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="flex-between">
+                    <button class="btn-outline" onclick="window.location.href='search-results.html'">Back</button>
+                    <button class="btn-primary" style="width: auto;" onclick="window.location.href='payment.html'">Continue to Payment <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <div class="flex-between mb-4">
+                        <h3 style="font-size: 16px; color: var(--primary);">Fare Summary</h3>
+                    </div>
+                    <div style="font-size: 14px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px;">
+                        <div class="flex-between"><span>Ticket Fare</span><span>₹720.00</span></div>
+                        <div class="flex-between"><span>Reservation Charges</span><span>₹40.00</span></div>
+                        <div class="flex-between"><span>Superfast Charges</span><span>₹30.00</span></div>
+                        <div class="flex-between"><span>Service Tax (GST)</span><span>₹47.25</span></div>
+                        <div class="flex-between" style="border-bottom: 1px solid var(--border); padding-bottom: 12px;"><span>Travel Insurance</span><span>₹0.92</span></div>
+                        <div class="flex-between" style="color: var(--primary); font-size: 16px; font-weight: 700; margin-top: 4px;"><span>Total Amount</span><span>₹838.17</span></div>
+                    </div>
+                </div>
+
+                <div class="card" style="text-align: center;">
+                    <div style="color: #DC2626; font-size: 24px; margin-bottom: 8px;"><i class="fa-regular fa-clock"></i></div>
+                    <h3 style="font-size: 14px; color: var(--text-main);">Session Expires In</h3>
+                    <div id="countdown" style="font-size: 24px; font-weight: 700; color: #DC2626;">14:32</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="saveToast" class="toast"><i class="fa-solid fa-floppy-disk text-success"></i> Progress auto-saved</div>
+    <script src="script.js"></script>
+</body>
+</html>
